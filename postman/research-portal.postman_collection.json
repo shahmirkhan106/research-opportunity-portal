@@ -1,0 +1,303 @@
+{
+  "info": {
+    "_postman_id": "7f1c9b2e-4a6d-4e8a-9c3f-2b5d8e1a6f40",
+    "name": "Research Opportunity Portal",
+    "description": "End-to-end CRUD tests for the University Research Opportunity Portal API. Set the `baseUrl` variable if not running on http://localhost:3000. Runs in order: creates 3 opportunities, lists, reads, updates, closes, deletes, verifies 404 and validation error.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "opportunityId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "1. Create opportunity #1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+              "pm.test('Response has id and status Open', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('id');",
+              "  pm.expect(body.status).to.eql('Open');",
+              "});",
+              "pm.collectionVariables.set('opportunityId', pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Undergraduate Research Assistant - Computer Vision\",\n  \"description\": \"Assist in developing object detection models for autonomous drone navigation.\",\n  \"research_area\": \"Computer Vision\",\n  \"faculty_name\": \"Dr. Hassan Ali\",\n  \"department\": \"Computer Science\",\n  \"required_skills\": \"Python, OpenCV, PyTorch, Git\",\n  \"positions_available\": 2,\n  \"application_deadline\": \"2027-03-15\",\n  \"status\": \"Open\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities"]
+        }
+      }
+    },
+    {
+      "name": "2. Create opportunity #2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+              "pm.test('Response body matches request title', () => {",
+              "  pm.expect(pm.response.json().title).to.eql('Blockchain for Academic Credentials');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Blockchain for Academic Credentials\",\n  \"description\": \"Design a permissioned ledger for verifying degree certificates.\",\n  \"research_area\": \"Distributed Systems\",\n  \"faculty_name\": \"Dr. Fatima Noor\",\n  \"department\": \"Information Technology\",\n  \"required_skills\": \"Solidity, Node.js, Cryptography\",\n  \"positions_available\": 1,\n  \"application_deadline\": \"2027-02-28\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities"]
+        }
+      }
+    },
+    {
+      "name": "3. Create opportunity #3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', () => pm.response.to.have.status(201));",
+              "pm.test('Default status is Open', () => {",
+              "  pm.expect(pm.response.json().status).to.eql('Open');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Water Quality Sensor Network\",\n  \"description\": \"Deploy and analyze IoT sensor data for campus water quality monitoring.\",\n  \"research_area\": \"Internet of Things\",\n  \"faculty_name\": \"Dr. Bilal Rehman\",\n  \"department\": \"Electrical Engineering\",\n  \"required_skills\": \"C++, Arduino, MQTT, Data Analysis\",\n  \"positions_available\": 3,\n  \"application_deadline\": \"2027-04-10\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities"]
+        }
+      }
+    },
+    {
+      "name": "4. Get all opportunities",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is a non-empty array', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.be.an('array').that.is.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities"]
+        }
+      }
+    },
+    {
+      "name": "5. Get one opportunity by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response has matching id', () => {",
+              "  pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('opportunityId')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities/{{opportunityId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        }
+      }
+    },
+    {
+      "name": "6. Update an opportunity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Title was updated', () => {",
+              "  pm.expect(pm.response.json().title).to.eql('Undergraduate Research Assistant - Computer Vision (Updated)');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Undergraduate Research Assistant - Computer Vision (Updated)\",\n  \"positions_available\": 3\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities/{{opportunityId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        }
+      }
+    },
+    {
+      "name": "7. Close an opportunity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Status is now Closed', () => {",
+              "  pm.expect(pm.response.json().status).to.eql('Closed');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Closed\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities/{{opportunityId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        }
+      }
+    },
+    {
+      "name": "8. Delete an opportunity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Success message returned', () => {",
+              "  pm.expect(pm.response.json().message).to.eql('Opportunity deleted successfully');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities/{{opportunityId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        }
+      }
+    },
+    {
+      "name": "9. Get the deleted opportunity again (expect 404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', () => pm.response.to.have.status(404));",
+              "pm.test('Error body is present', () => {",
+              "  pm.expect(pm.response.json()).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities/{{opportunityId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        }
+      }
+    },
+    {
+      "name": "10. Create with missing data (expect 400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', () => pm.response.to.have.status(400));",
+              "pm.test('Details list missing fields', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.have.property('details').that.is.an('array').that.is.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Incomplete record\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/opportunities",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "opportunities"]
+        }
+      }
+    }
+  ]
+}
