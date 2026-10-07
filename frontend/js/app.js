@@ -4,9 +4,123 @@ const listWrapper = document.getElementById('list-wrapper');
 const recordCount = document.getElementById('record-count');
 const detailsModalEl = document.getElementById('details-modal');
 const deleteModalEl = document.getElementById('delete-modal');
+const formModalEl = document.getElementById('opportunity-modal');
+const opportunityForm = document.getElementById('opportunity-form');
+const submitButton = document.getElementById('btn-submit-opportunity');
+const formModalTitle = document.getElementById('form-modal-title');
+
+const STRING_FORM_FIELDS = [
+  'title',
+  'description',
+  'research_area',
+  'faculty_name',
+  'department',
+  'required_skills',
+];
+const ALL_FORM_FIELDS = [
+  ...STRING_FORM_FIELDS,
+  'positions_available',
+  'application_deadline',
+  'status',
+];
 
 let currentOpportunities = [];
 let opportunityBeingDeleted = null;
+let editingOpportunityId = null;
+
+function getFormElement(field) {
+  return document.getElementById(`field-${field}`);
+}
+
+function setFieldError(field, message) {
+  const input = getFormElement(field);
+  input.classList.toggle('is-invalid', Boolean(message));
+  const feedback = input.parentElement.querySelector('.invalid-feedback');
+  if (feedback) feedback.textContent = message || '';
+}
+
+function clearFormErrors() {
+  ALL_FORM_FIELDS.forEach((field) => setFieldError(field, ''));
+}
+
+function resetForm() {
+  opportunityForm.reset();
+  clearFormErrors();
+  editingOpportunityId = null;
+  formModalTitle.textContent = 'Add Opportunity';
+  submitButton.textContent = 'Save';
+  submitButton.disabled = false;
+}
+
+function readFormValues() {
+  const values = {};
+  for (const field of ALL_FORM_FIELDS) {
+    const input = getFormElement(field);
+    values[field] = typeof input.value === 'string' ? input.value.trim() : input.value;
+  }
+  return values;
+}
+
+function validateOpportunityForm() {
+  const values = readFormValues();
+  const errors = {};
+
+  for (const field of STRING_FORM_FIELDS) {
+    if (!values[field]) errors[field] = 'This field is required.';
+  }
+
+  const positions = Number(values.positions_available);
+  if (!values.positions_available || !Number.isInteger(positions) || positions < 1) {
+    errors.positions_available = 'Positions must be a whole number of at least 1.';
+  }
+
+  if (!values.application_deadline) {
+    errors.application_deadline = 'Please choose a deadline.';
+  }
+
+  clearFormErrors();
+  for (const [field, message] of Object.entries(errors)) {
+    setFieldError(field, message);
+  }
+
+  return { ok: Object.keys(errors).length === 0, values };
+}
+
+function formatError(err) {
+  if (err.details && err.details.length > 0) {
+    return `${err.message}: ${err.details.join(' ')}`;
+  }
+  return err.message;
+}
+
+function openCreateForm() {
+  resetForm();
+  bootstrap.Modal.getOrCreateInstance(formModalEl).show();
+}
+
+opportunityForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const { ok, values } = validateOpportunityForm();
+  if (!ok) return;
+
+  submitButton.disabled = true;
+  try {
+    await OpportunityAPI.create(values);
+    bootstrap.Modal.getOrCreateInstance(formModalEl).hide();
+    resetForm();
+    showAlert('success', 'Opportunity created successfully.');
+    await loadOpportunities();
+  } catch (err) {
+    showAlert('danger', formatError(err));
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+formModalEl.addEventListener('hidden.bs.modal', resetForm);
+
+document.getElementById('btn-add-opportunity').addEventListener('click', openCreateForm);
 
 function createTextCell(text, className) {
   const td = document.createElement('td');
