@@ -13,4 +13,9 @@ app.get('/api/health', (req, res) => {
 
 app.use(express.static(path.join(__dirname, '..', '..', 'frontend')));
 
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 module.exports = app;
