@@ -98,6 +98,69 @@ function openCreateForm() {
   bootstrap.Modal.getOrCreateInstance(formModalEl).show();
 }
 
+function openEditForm(opportunity) {
+  resetForm();
+  editingOpportunityId = opportunity.id;
+  formModalTitle.textContent = 'Edit Opportunity';
+  submitButton.textContent = 'Save changes';
+
+  for (const field of ALL_FORM_FIELDS) {
+    const input = getFormElement(field);
+    if (opportunity[field] != null) input.value = opportunity[field];
+  }
+
+  bootstrap.Modal.getOrCreateInstance(formModalEl).show();
+}
+
+function findById(id) {
+  return currentOpportunities.find((opportunity) => opportunity.id === id);
+}
+
+async function closeOpportunity(id, button) {
+  button.disabled = true;
+  try {
+    await OpportunityAPI.update(id, { status: 'Closed' });
+    showAlert('success', 'Opportunity closed.');
+    await loadOpportunities();
+  } catch (err) {
+    showAlert('danger', formatError(err));
+    if (err.status === 404) await loadOpportunities();
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function requestDelete(opportunity) {
+  opportunityBeingDeleted = opportunity;
+  document.getElementById('delete-target-title').textContent = opportunity.title;
+  bootstrap.Modal.getOrCreateInstance(deleteModalEl).show();
+}
+
+async function confirmDelete() {
+  if (!opportunityBeingDeleted) return;
+
+  const confirmButton = document.getElementById('btn-confirm-delete');
+  confirmButton.disabled = true;
+  try {
+    await OpportunityAPI.remove(opportunityBeingDeleted.id);
+    bootstrap.Modal.getOrCreateInstance(deleteModalEl).hide();
+    showAlert('success', 'Opportunity deleted successfully.');
+    opportunityBeingDeleted = null;
+    await loadOpportunities();
+  } catch (err) {
+    showAlert('danger', formatError(err));
+    if (err.status === 404) await loadOpportunities();
+  } finally {
+    confirmButton.disabled = false;
+  }
+}
+
+document.getElementById('btn-confirm-delete').addEventListener('click', confirmDelete);
+
+deleteModalEl.addEventListener('hidden.bs.modal', () => {
+  opportunityBeingDeleted = null;
+});
+
 opportunityForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -106,13 +169,23 @@ opportunityForm.addEventListener('submit', async (event) => {
 
   submitButton.disabled = true;
   try {
-    await OpportunityAPI.create(values);
+    if (editingOpportunityId != null) {
+      await OpportunityAPI.update(editingOpportunityId, values);
+      showAlert('success', 'Opportunity updated successfully.');
+    } else {
+      await OpportunityAPI.create(values);
+      showAlert('success', 'Opportunity created successfully.');
+    }
     bootstrap.Modal.getOrCreateInstance(formModalEl).hide();
     resetForm();
-    showAlert('success', 'Opportunity created successfully.');
     await loadOpportunities();
   } catch (err) {
     showAlert('danger', formatError(err));
+    if (err.status === 404) {
+      bootstrap.Modal.getOrCreateInstance(formModalEl).hide();
+      resetForm();
+      await loadOpportunities();
+    }
   } finally {
     submitButton.disabled = false;
   }
@@ -171,15 +244,15 @@ function renderList(opportunities) {
     viewBtn.dataset.id = opportunity.id;
     actions.appendChild(viewBtn);
 
-    if (opportunity.status === 'Open') {
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'btn btn-sm btn-outline-secondary me-1';
-      editBtn.textContent = 'Edit';
-      editBtn.dataset.action = 'edit';
-      editBtn.dataset.id = opportunity.id;
-      actions.appendChild(editBtn);
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn btn-sm btn-outline-secondary me-1';
+    editBtn.textContent = 'Edit';
+    editBtn.dataset.action = 'edit';
+    editBtn.dataset.id = opportunity.id;
+    actions.appendChild(editBtn);
 
+    if (opportunity.status === 'Open') {
       const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.className = 'btn btn-sm btn-outline-warning me-1';
@@ -257,6 +330,19 @@ listBody.addEventListener('click', (event) => {
     case 'view':
       openDetails(id);
       break;
+    case 'edit': {
+      const opportunity = findById(id);
+      if (opportunity) openEditForm(opportunity);
+      break;
+    }
+    case 'close':
+      closeOpportunity(id, button);
+      break;
+    case 'delete': {
+      const opportunity = findById(id);
+      if (opportunity) requestDelete(opportunity);
+      break;
+    }
     default:
       break;
   }
