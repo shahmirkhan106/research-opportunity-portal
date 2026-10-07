@@ -11,6 +11,9 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+const opportunityRoutes = require('./routes/opportunityRoutes');
+app.use('/api/opportunities', opportunityRoutes);
+
 app.use(express.static(path.join(__dirname, '..', '..', 'frontend')));
 
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
