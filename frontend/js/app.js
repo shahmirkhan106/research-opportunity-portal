@@ -163,6 +163,7 @@ deleteModalEl.addEventListener('hidden.bs.modal', () => {
 
 opportunityForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (submitButton.disabled) return;
 
   const { ok, values } = validateOpportunityForm();
   if (!ok) return;
