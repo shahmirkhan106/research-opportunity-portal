@@ -84,6 +84,22 @@ async function updateOpportunity(req, res, next) {
   }
 }
 
+async function deleteOpportunity(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const [existing] = await pool.query('SELECT id FROM opportunities WHERE id = ?', [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Opportunity not found' });
+    }
+
+    await pool.query('DELETE FROM opportunities WHERE id = ?', [id]);
+    return res.status(200).json({ message: 'Opportunity deleted successfully' });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function getAllOpportunities(req, res, next) {
   try {
     const [rows] = await pool.query(
@@ -114,4 +130,5 @@ module.exports = {
   getAllOpportunities,
   getOpportunityById,
   updateOpportunity,
+  deleteOpportunity,
 };

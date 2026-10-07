@@ -4,6 +4,7 @@ const {
   getAllOpportunities,
   getOpportunityById,
   updateOpportunity,
+  deleteOpportunity,
 } = require('../controllers/opportunityController');
 const {
   validateCreate,
@@ -17,5 +18,6 @@ router.post('/', validateCreate, createOpportunity);
 router.get('/', getAllOpportunities);
 router.get('/:id', validateId, getOpportunityById);
 router.put('/:id', validateId, validateUpdate, updateOpportunity);
+router.delete('/:id', validateId, deleteOpportunity);
 
 module.exports = router;
