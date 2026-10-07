@@ -1,0 +1,98 @@
+:root {
+  --portal-muted: #6c757d;
+}
+
+body {
+  background-color: #f6f7f9;
+  min-height: 100vh;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+#alert-area {
+  position: fixed;
+  top: 4.5rem;
+  right: 1rem;
+  z-index: 1080;
+  max-width: min(420px, calc(100vw - 2rem));
+}
+
+#alert-area .alert {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.table thead th {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.cell-title {
+  font-weight: 600;
+  max-width: 20rem;
+}
+
+.cell-clamp {
+  display: block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge-status-open {
+  background-color: #198754;
+}
+
+.badge-status-closed {
+  background-color: #6c757d;
+}
+
+.actions-nowrap {
+  white-space: nowrap;
+}
+
+#empty-state {
+  background: #fff;
+  border: 1px dashed #ced4da;
+  border-radius: 0.5rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 0.6rem 1rem;
+}
+
+.details-grid dt {
+  color: var(--portal-muted);
+  font-weight: 500;
+}
+
+.details-grid dd {
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.15rem 0;
+  }
+
+  .details-grid dd {
+    margin-bottom: 0.6rem;
+  }
+
+  .cell-title,
+  .cell-clamp {
+    max-width: 10rem;
+  }
+}
